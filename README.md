@@ -1,4 +1,19 @@
-# vuepress-plugin-fulltext-search
+# vuepress-plugin-fulltext-search-improvement
+
+Make some improvements to the fulltext search plugin based on the *vuepress-plugin-fulltext-search* 
+https://www.npmjs.com/package/vuepress-plugin-fulltext-search
+
+Now it supports highlight the searching results in the search result page, and make some interaction changes to the search input
+
+the below is the usage document wrote by the previous author
+
+TODO: 
+- fix the issue of highlighting search result not work on title
+- support using keyon and keydowm to preview the search result instantly
+- adjust the location of the search bar
+
+-----------
+
 
 Add full-text search capabilities to your [VuePress](https://vuepress.vuejs.org/) website using the
 [Flexsearch](https://github.com/nextapps-de/flexsearch) library.

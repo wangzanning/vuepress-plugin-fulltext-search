@@ -61,6 +61,8 @@ export default {
       focusIndex: 0,
       placeholder: undefined,
       suggestions: null,
+      highlightWord:'',
+      lastWord:'',
     }
   },
   computed: {
@@ -84,9 +86,28 @@ export default {
     },
   },
   watch: {
-    query() {
+    query(val) {
       this.getSuggestions()
+      if(!this.suggestions?.length && this.lastWord){
+        this.$nextTick(()=>{
+          let target = document.querySelector('.theme-default-content.content__default').innerHTML
+          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(`<font>${this.lastWord}</font>`,this.lastWord)
+        })
+      }
     },
+    $route(to,from){
+      if(this.suggestions?.length && this.highlightWord){
+        let val = this.highlightWord
+        const reg = val?new RegExp(val,'g'):''
+        this.$nextTick(()=>{
+          let target = document.querySelector('.theme-default-content.content__default').innerHTML
+          if( val&&reg && target) {
+            document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(val,`<font>${val}</font>`)
+            this.lastWord = val // 记录上一次查询词语
+          }
+        });
+      }
+    }
   },
   /* global OPTIONS */
   mounted() {
@@ -175,6 +196,7 @@ export default {
       }
     },
     go(i) {
+      this.highlightWord  = ''
       if (!this.showSuggestions) {
         return
       }
@@ -186,7 +208,9 @@ export default {
         window.open(this.suggestions[i].path + this.suggestions[i].slug, '_blank')
       } else {
         this.$router.push(this.suggestions[i].path + this.suggestions[i].slug)
-        this.query = ''
+        // this.query = ''
+        const val = this.suggestions[i]?.contentDisplay?.highlightedContent
+        this.highlightWord = val || ''
         this.focusIndex = 0
         this.focused = false
 
@@ -202,6 +226,30 @@ export default {
     },
     focus(i) {
       this.focusIndex = i
+      if (!this.showSuggestions) {
+        return
+      }
+      if (hooks.onGoToSuggestion) {
+        const result = hooks.onGoToSuggestion(i, this.suggestions[i], this.query, this.queryTerms)
+        if (result === true) return
+      }
+      if (this.suggestions[i].external) {
+        window.open(this.suggestions[i].path + this.suggestions[i].slug, '_blank')
+      } else {
+        this.$router.push(this.suggestions[i].path + this.suggestions[i].slug)
+        const val = this.suggestions[i]?.contentDisplay?.highlightedContent
+        this.highlightWord = val || ''
+        this.focused = true;
+
+        // reset query param
+        const params = this.urlParams()
+        if (params) {
+          params.delete('query')
+          const paramsString = params.toString()
+          const newState = window.location.pathname + (paramsString ? `?${paramsString}` : '')
+          history.pushState(null, '', newState)
+        }
+      }
     },
     unfocus() {
       this.focusIndex = -1
@@ -231,6 +279,8 @@ function highlight(str, strHighlight) {
 </script>
 
 <style lang="stylus">
+font
+  background yellow
 .search-box
   display inline-block
   position relative

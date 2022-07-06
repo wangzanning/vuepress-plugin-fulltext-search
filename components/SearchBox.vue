@@ -15,10 +15,11 @@
       @keyup.up="onUp"
       @keyup.down="onDown"
     />
-    <ul v-if="showSuggestions" class="suggestions" :class="{ 'align-right': alignRight }" @mouseleave="unfocus">
+    <ul v-if="showSuggestions" class="suggestions" :class="{ 'align-right': alignRight }" @mouseleave="unfocus" ref="suggestions">
       <li
         v-for="(s, i) in suggestions"
         :key="i"
+        :ref="`item_${i}`"
         class="suggestion"
         :class="{ focused: i === focusIndex }"
         @mousedown="go(i)"
@@ -90,7 +91,9 @@ export default {
       this.getSuggestions()
       if(!this.suggestions?.length && this.lastWord){
         this.$nextTick(()=>{
+          console.log('456');
           let target = document.querySelector('.theme-default-content.content__default').innerHTML
+          console.log(target);
           document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(`<font>${this.lastWord}</font>`,this.lastWord)
         })
       }
@@ -100,7 +103,9 @@ export default {
         let val = this.highlightWord
         const reg = val?new RegExp(val,'g'):''
         this.$nextTick(()=>{
+          console.log('123');
           let target = document.querySelector('.theme-default-content.content__default').innerHTML
+          console.log(target);
           if( val&&reg && target) {
             document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(val,`<font>${val}</font>`)
             this.lastWord = val // 记录上一次查询词语
@@ -135,6 +140,7 @@ export default {
         this.suggestions = []
         return
       }
+      console.log('config', this.query, this.queryTerms);
       let suggestions = await flexsearchSvc.match(
         this.query,
         this.queryTerms,
@@ -185,6 +191,8 @@ export default {
           this.focusIndex = this.suggestions.length - 1
         }
       }
+      // this.ensureFocusedInView(this.focusIndex);
+      this.showCurrentResult(this.focusIndex);
     },
     onDown() {
       if (this.showSuggestions) {
@@ -194,6 +202,8 @@ export default {
           this.focusIndex = 0
         }
       }
+      // this.ensureFocusedInView(this.focusIndex);
+      this.showCurrentResult(this.focusIndex);
     },
     go(i) {
       this.highlightWord  = ''
@@ -226,6 +236,13 @@ export default {
     },
     focus(i) {
       this.focusIndex = i
+      this.showCurrentResult(i);
+      // debugger
+    },
+    unfocus() {
+      this.focusIndex = -1
+    },
+    showCurrentResult(i) {
       if (!this.showSuggestions) {
         return
       }
@@ -251,16 +268,38 @@ export default {
         }
       }
     },
-    unfocus() {
-      this.focusIndex = -1
-    },
     urlParams() {
       if (!window.location.search) {
         return null
       }
       return new URLSearchParams(window.location.search)
     },
+    ensureFocusedInView(index ,natural) {
+      if (!this.showSuggestions) {
+        return
+      }
+      const focusEl = this.$refs[`item_${this.focusIndex}`][0];
+      const parentEl = this.$refs.suggestions;
+      console.log('el',focusEl)
+      console.log('focusElRECT',focusEl.getBoundingClientRect());
+      console.log('parentEl',parentEl.getBoundingClientRect());
+
+      // if (focusEl) {
+      //   const rect = focusEl.getBoundingClientRect()
+      //   const top = rect.top
+      //   const bottom = rect.bottom
+      //   const viewHeight = window.innerHeight
+      //   if (top < 0 || bottom > viewHeight) {
+      //     if (natural) {
+      //       window.scrollTo(0, top)
+      //     } else {
+      //       window.scrollTo(0, top - viewHeight / 2)
+      //     }
+      //   }
+      // }
+    },
   },
+
 }
 
 function highlight(str, strHighlight) {
@@ -276,6 +315,7 @@ function highlight(str, strHighlight) {
 
   // return `${prefix}<span class="highlight">${highlightedContent}</span>${suffix}`
 }
+
 </script>
 
 <style lang="stylus">
@@ -356,9 +396,9 @@ font
           padding 5px
           .header
             font-weight 600
-
     &.focused
-      background-color #f3f4f5
+      background-color #468fe3
+      transition background-color .15s linear
 @media (max-width: $MQNarrow)
   .search-box
     input

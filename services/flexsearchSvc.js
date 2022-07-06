@@ -1,8 +1,10 @@
-import Flexsearch from 'flexsearch'
+// import Flexsearch from 'flexsearch'
 // Use when flexSearch v0.7.0 will be available
 // import cyrillicCharset from 'flexsearch/dist/lang/cyrillic/default.min.js'
 // import cjkCharset from 'flexsearch/dist/lang/cjk/default.min.js'
 import _ from 'lodash'
+// eslint-disable-next-line no-unused-vars
+const { Index, Document, Worker } = require("flexsearch")
 
 let index = null
 let cyrillicIndex = null
@@ -27,14 +29,14 @@ export default {
         field: ['title', 'headersStr', 'content'],
       },
     }
-    index = new Flexsearch(indexSettings)
+    index = new Document(indexSettings)
     index.add(pages)
 
     const cyrillicPages = pages.filter(p => p.charsets.cyrillic)
     const cjkPages = pages.filter(p => p.charsets.cjk)
 
     if (cyrillicPages.length) {
-      cyrillicIndex = new Flexsearch({
+      cyrillicIndex = new Document({
         ...indexSettings,
         encode: 'icase',
         split: /\s+/,
@@ -43,7 +45,7 @@ export default {
       cyrillicIndex.add(cyrillicPages)
     }
     if (cjkPages.length) {
-      cjkIndex = new Flexsearch({
+      cjkIndex = new Document({
         ...indexSettings,
         encode: false,
         tokenize: function(str) {
@@ -85,6 +87,7 @@ export default {
     const searchResult1 = await index.search(searchParams)
     const searchResult2 = cyrillicIndex ? await cyrillicIndex.search(searchParams) : []
     const searchResult3 = cjkIndex ? await cjkIndex.search(searchParams) : []
+    console.log(searchResult1, searchResult2, searchResult3);
     const searchResult = _.uniqBy([...searchResult1, ...searchResult2, ...searchResult3], 'path')
     const result = searchResult.map(page => ({
       ...page,

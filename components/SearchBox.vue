@@ -15,7 +15,8 @@
       @keyup.up="onUp"
       @keyup.down="onDown"
     />
-    <ul v-if="showSuggestions" class="suggestions" :class="{ 'align-right': alignRight }" @mouseleave="unfocus" ref="suggestions">
+    <ul v-if="showSuggestions" class="suggestions" :class="{ 'align-right': alignRight }" @mouseleave="unfocus"
+        ref="suggestions">
       <li
         v-for="(s, i) in suggestions"
         :key="i"
@@ -26,17 +27,21 @@
         @mouseenter="focus(i)"
       >
         <a :href="s.path + s.slug" @click.prevent>
-          <div v-if="s.parentPageTitle" class="parent-page-title" v-html="s.parentPageTitle" />
+          <div v-if="s.parentPageTitle" class="parent-page-title" v-html="s.parentPageTitle"/>
           <div class="suggestion-row">
             <div class="page-title">{{ s.title || s.path }}</div>
             <div class="suggestion-content">
               <!-- prettier-ignore -->
               <div v-if="s.headingStr" class="header">
-                {{ s.headingDisplay.prefix }}<span class="highlight">{{ s.headingDisplay.highlightedContent }}</span>{{ s.headingDisplay.suffix }}
+                {{ s.headingDisplay.prefix }}<span class="highlight">{{
+                  s.headingDisplay.highlightedContent
+                }}</span>{{ s.headingDisplay.suffix }}
               </div>
               <!-- prettier-ignore -->
               <div v-if="s.contentStr">
-                {{ s.contentDisplay.prefix }}<span class="highlight">{{ s.contentDisplay.highlightedContent }}</span>{{ s.contentDisplay.suffix }}
+                {{ s.contentDisplay.prefix }}<span class="highlight">{{
+                  s.contentDisplay.highlightedContent
+                }}</span>{{ s.contentDisplay.suffix }}
               </div>
             </div>
           </div>
@@ -62,8 +67,8 @@ export default {
       focusIndex: 0,
       placeholder: undefined,
       suggestions: null,
-      highlightWord:'',
-      lastWord:'',
+      highlightWord: '',
+      lastWord: '',
     }
   },
   computed: {
@@ -89,29 +94,30 @@ export default {
   watch: {
     query(val) {
       this.getSuggestions()
-      if(!this.suggestions?.length && this.lastWord){
-        this.$nextTick(()=>{
-          console.log('456');
+      if (!this.suggestions?.length && this.lastWord) {
+        this.$nextTick(() => {
           let target = document.querySelector('.theme-default-content.content__default').innerHTML
-          console.log(target);
-          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(`<font>${this.lastWord}</font>`,this.lastWord)
+          let headElement = document.querySelectorAll('h1,h2,h3,h4,h5,h6');
+          for (let index = 0; index < headElement.length; index++) {
+            document.querySelectorAll('h1,h2,h3,h4,h5,h6')[index].innerHTML = headElement[index].innerHTML.replace(`<font>${this.lastWord}</font>`, this.lastWord)
+          }
+          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(`<font>${this.lastWord}</font>`, this.lastWord)
         })
       }
     },
-    $route(to,from){
-      if(this.suggestions?.length && this.highlightWord){
-        let val = this.highlightWord
-        const reg = val?new RegExp(val,'g'):''
-        this.$nextTick(()=>{
-          console.log('123');
-          let target = document.querySelector('.theme-default-content.content__default').innerHTML
-          console.log(target);
-          if( val&&reg && target) {
-            document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(val,`<font>${val}</font>`)
-            this.lastWord = val // 记录上一次查询词语
-          }
-        });
-      }
+    $route(to, from) {
+      // console.log('sugg', this.suggestions);
+      // console.log('words', this.highlightWord);
+      let val = this.query;
+      this.$nextTick(() => {
+        let target = document.querySelector('.theme-default-content.content__default').innerHTML
+        let headElement = document.querySelectorAll('h1,h2,h3,h4,h5,h6');
+        if (this.query && target) {
+          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(new RegExp(val, 'g'), `<font>${val}</font>`)
+          this.lastWord = val // 记录上一次查询词语
+        }
+      });
+
     }
   },
   /* global OPTIONS */
@@ -206,7 +212,7 @@ export default {
       this.showCurrentResult(this.focusIndex);
     },
     go(i) {
-      this.highlightWord  = ''
+      this.highlightWord = ''
       if (!this.showSuggestions) {
         return
       }
@@ -274,15 +280,15 @@ export default {
       }
       return new URLSearchParams(window.location.search)
     },
-    ensureFocusedInView(index ,natural) {
+    ensureFocusedInView(index, natural) {
       if (!this.showSuggestions) {
         return
       }
       const focusEl = this.$refs[`item_${this.focusIndex}`][0];
       const parentEl = this.$refs.suggestions;
-      console.log('el',focusEl)
-      console.log('focusElRECT',focusEl.getBoundingClientRect());
-      console.log('parentEl',parentEl.getBoundingClientRect());
+      console.log('el', focusEl)
+      console.log('focusElRECT', focusEl.getBoundingClientRect());
+      console.log('parentEl', parentEl.getBoundingClientRect());
 
       // if (focusEl) {
       //   const rect = focusEl.getBoundingClientRect()
@@ -304,14 +310,14 @@ export default {
 
 function highlight(str, strHighlight) {
   if (!str) return {}
-  if (!strHighlight) return { prefix: str }
+  if (!strHighlight) return {prefix: str}
   const [start, length] = strHighlight
   const end = start + length
 
   const prefix = str.slice(0, start)
   const highlightedContent = str.slice(start, end)
   const suffix = str.slice(end)
-  return { prefix, highlightedContent, suffix }
+  return {prefix, highlightedContent, suffix}
 
   // return `${prefix}<span class="highlight">${highlightedContent}</span>${suffix}`
 }
@@ -321,10 +327,12 @@ function highlight(str, strHighlight) {
 <style lang="stylus">
 font
   background yellow
+
 .search-box
   display inline-block
   position relative
   margin-right 1rem
+
   input
     cursor text
     width 10rem
@@ -340,32 +348,38 @@ font
     transition all .2s ease
     background #fff url(../assets/search.svg) 0.6rem 0.5rem no-repeat
     background-size 1rem
+
     &:focus
       cursor auto
       border-color $accentColor
+
   .suggestions
     background #fff
     min-width 500px
     max-width 700px
     position absolute
-    top 2 rem
+    top 2rem
     border 1px solid darken($borderColor, 10%)
     border-radius 6px
     padding 0.4rem
     list-style-type none
+
     &.align-right
       right 0
+
   .suggestion
     line-height 1.4
     // padding 0.4rem 0.6rem
     border-radius 4px
     cursor pointer
     width 100%
+
     a
       display block
       white-space normal
       color lighten($textColor, 15%)
       width 100%
+
       .parent-page-title
         color white
         font-weight 600
@@ -376,6 +390,7 @@ font
         border-collapse collapse
         width 100%
         display table
+
         .page-title
           width: 35%
           border 1px solid $borderColor
@@ -385,6 +400,7 @@ font
           text-align right
           padding 5px
           font-weight 600
+
         .suggestion-content
           .highlight
             text-decoration: underline
@@ -394,11 +410,14 @@ font
           width: 65%
           display table-cell
           padding 5px
+
           .header
             font-weight 600
+
     &.focused
       background-color #468fe3
       transition background-color .15s linear
+
 @media (max-width: $MQNarrow)
   .search-box
     input
@@ -406,29 +425,37 @@ font
       width 0
       border-color transparent
       position relative
+
       &:focus
         cursor text
         left 0
         width 10rem
+
 // Match IE11
 @media all and (-ms-high-contrast: none)
   .search-box input
     height 2rem
+
 @media (max-width: $MQNarrow) and (min-width: $MQMobile)
   .search-box
     .suggestions
       left 0
+
 @media (max-width: $MQMobile)
   .search-box
     margin-right 0
+
     input
       left 1rem
+
     .suggestions
       right 0
+
 @media (max-width: $MQMobileNarrow)
   .search-box
     .suggestions
       width calc(100vw - 4rem)
+
     input:focus
       width 8rem
 </style>

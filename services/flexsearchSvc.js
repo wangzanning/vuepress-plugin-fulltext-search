@@ -1,10 +1,9 @@
-// import Flexsearch from 'flexsearch'
+import Flexsearch from 'flexsearch'
 // Use when flexSearch v0.7.0 will be available
 // import cyrillicCharset from 'flexsearch/dist/lang/cyrillic/default.min.js'
 // import cjkCharset from 'flexsearch/dist/lang/cjk/default.min.js'
 import _ from 'lodash'
-// eslint-disable-next-line no-unused-vars
-const { Index, Document, Worker } = require("flexsearch")
+// const { Index, Document, Worker } = require("flexsearch")
 
 let index = null
 let cyrillicIndex = null
@@ -29,14 +28,14 @@ export default {
         field: ['title', 'headersStr', 'content'],
       },
     }
-    index = new Document(indexSettings)
+    index = new Flexsearch(indexSettings)
     index.add(pages)
 
     const cyrillicPages = pages.filter(p => p.charsets.cyrillic)
     const cjkPages = pages.filter(p => p.charsets.cjk)
 
     if (cyrillicPages.length) {
-      cyrillicIndex = new Document({
+      cyrillicIndex = new Flexsearch({
         ...indexSettings,
         encode: 'icase',
         split: /\s+/,
@@ -45,7 +44,7 @@ export default {
       cyrillicIndex.add(cyrillicPages)
     }
     if (cjkPages.length) {
-      cjkIndex = new Document({
+      cjkIndex = new Flexsearch({
         ...indexSettings,
         encode: false,
         tokenize: function(str) {

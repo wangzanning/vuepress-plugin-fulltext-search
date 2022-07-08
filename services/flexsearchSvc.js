@@ -19,6 +19,7 @@ export default {
       encode: options.encode || 'simple',
       tokenize: options.tokenize || 'forward',
       split: options.split || /\W+/,
+      threshold: 10,
       async: true,
       doc: {
         id: 'key',
@@ -63,7 +64,7 @@ export default {
     }
     pagesByPath = _.keyBy(pages, 'path')
   },
-  async match(queryString, queryTerms, limit = 7) {
+  async match(queryString, queryTerms, limit = 1000) {
     const searchParams = [
       {
         field: 'title',
@@ -81,19 +82,24 @@ export default {
         field: 'content',
         query: queryString,
         limit,
+        boost: 10,
       },
     ]
     const searchResult1 = await index.search(searchParams)
     const searchResult2 = cyrillicIndex ? await cyrillicIndex.search(searchParams) : []
     const searchResult3 = cjkIndex ? await cjkIndex.search(searchParams) : []
-    console.log(searchResult1, searchResult2, searchResult3);
-    const searchResult = _.uniqBy([...searchResult1, ...searchResult2, ...searchResult3], 'path')
+    // console.log(searchResult1, searchResult2, searchResult3);
+    let searchResult = _.uniqBy([...searchResult1, ...searchResult2, ...searchResult3], 'path')
+    searchResult = searchResult.filter((item)=> {
+      return item.content.indexOf(queryString) !== -1;
+    })
+    console.log(searchResult);
+    console.log(queryString);
     const result = searchResult.map(page => ({
       ...page,
       parentPageTitle: getParentPageTitle(page),
       ...getAdditionalInfo(page, normalizeString(queryString), queryTerms),
     }))
-
     const resultByParent = _.groupBy(result, 'parentPageTitle')
     return _.values(resultByParent)
       .map(arr =>

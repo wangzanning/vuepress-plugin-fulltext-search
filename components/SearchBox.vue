@@ -97,21 +97,14 @@ export default {
       if (!this.suggestions?.length && this.lastWord) {
         this.$nextTick(() => {
           let target = document.querySelector('.theme-default-content.content__default').innerHTML
-          let headElement = document.querySelectorAll('h1,h2,h3,h4,h5,h6');
-          for (let index = 0; index < headElement.length; index++) {
-            document.querySelectorAll('h1,h2,h3,h4,h5,h6')[index].innerHTML = headElement[index].innerHTML.replace(`<font>${this.lastWord}</font>`, this.lastWord)
-          }
           document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(`<font>${this.lastWord}</font>`, this.lastWord)
         })
       }
     },
     $route(to, from) {
-      // console.log('sugg', this.suggestions);
-      // console.log('words', this.highlightWord);
       let val = this.query;
       this.$nextTick(() => {
         let target = document.querySelector('.theme-default-content.content__default').innerHTML
-        let headElement = document.querySelectorAll('h1,h2,h3,h4,h5,h6');
         if (this.query && target) {
           document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(new RegExp(val, 'g'), `<font>${val}</font>`)
           this.lastWord = val // 记录上一次查询词语
@@ -146,7 +139,6 @@ export default {
         this.suggestions = []
         return
       }
-      console.log('config', this.query, this.queryTerms);
       let suggestions = await flexsearchSvc.match(
         this.query,
         this.queryTerms,
@@ -243,7 +235,6 @@ export default {
     focus(i) {
       this.focusIndex = i
       this.showCurrentResult(i);
-      // debugger
     },
     unfocus() {
       this.focusIndex = -1
@@ -290,19 +281,6 @@ export default {
       console.log('focusElRECT', focusEl.getBoundingClientRect());
       console.log('parentEl', parentEl.getBoundingClientRect());
 
-      // if (focusEl) {
-      //   const rect = focusEl.getBoundingClientRect()
-      //   const top = rect.top
-      //   const bottom = rect.bottom
-      //   const viewHeight = window.innerHeight
-      //   if (top < 0 || bottom > viewHeight) {
-      //     if (natural) {
-      //       window.scrollTo(0, top)
-      //     } else {
-      //       window.scrollTo(0, top - viewHeight / 2)
-      //     }
-      //   }
-      // }
     },
   },
 
@@ -374,6 +352,9 @@ font
     cursor pointer
     width 100%
 
+    &.focused
+      background-color #eee
+
     a
       display block
       white-space normal
@@ -394,7 +375,6 @@ font
         .page-title
           width: 35%
           border 1px solid $borderColor
-          background: #f5f5f5
           border-left none
           display table-cell
           text-align right
@@ -413,10 +393,6 @@ font
 
           .header
             font-weight 600
-
-    &.focused
-      background-color #468fe3
-      transition background-color .15s linear
 
 @media (max-width: $MQNarrow)
   .search-box

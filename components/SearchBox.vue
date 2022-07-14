@@ -8,7 +8,7 @@
       :placeholder="placeholder"
       autocomplete="off"
       spellcheck="false"
-      @input="query = $event.target.value"
+      @input="handleInput($event)"
       @focus="focused = true"
       @blur="focused = false"
       @keyup.enter="go(focusIndex)"
@@ -200,6 +200,7 @@ export default {
           this.focusIndex = 0
         }
       }
+      this.focused = true
       // this.ensureFocusedInView(this.focusIndex);
       this.showCurrentResult(this.focusIndex);
     },
@@ -212,16 +213,13 @@ export default {
         const result = hooks.onGoToSuggestion(i, this.suggestions[i], this.query, this.queryTerms)
         if (result === true) return
       }
-      if (this.suggestions[i].external) {
+      if (this.suggestions[i]?.external) {
         window.open(this.suggestions[i].path + this.suggestions[i].slug, '_blank')
       } else {
         this.$router.push(this.suggestions[i].path + this.suggestions[i].slug)
         // this.query = ''
         const val = this.suggestions[i]?.contentDisplay?.highlightedContent
         this.highlightWord = val || ''
-        this.focusIndex = 0
-        this.focused = false
-
         // reset query param
         const params = this.urlParams()
         if (params) {
@@ -231,6 +229,8 @@ export default {
           history.pushState(null, '', newState)
         }
       }
+      this.focusIndex = 0
+      this.focused = false
     },
     focus(i) {
       this.focusIndex = i
@@ -281,6 +281,10 @@ export default {
       console.log('focusElRECT', focusEl.getBoundingClientRect());
       console.log('parentEl', parentEl.getBoundingClientRect());
 
+    },
+    handleInput(event) {
+      this.query = event.target.value
+      this.focused = true
     },
   },
 

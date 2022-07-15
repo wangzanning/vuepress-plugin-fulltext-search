@@ -209,6 +209,7 @@ export default {
       if (!this.showSuggestions) {
         return
       }
+      // debugger
       if (hooks.onGoToSuggestion) {
         const result = hooks.onGoToSuggestion(i, this.suggestions[i], this.query, this.queryTerms)
         if (result === true) return
@@ -341,6 +342,7 @@ font
     max-width 700px
     position absolute
     top 2rem
+    right 0rem
     border 1px solid darken($borderColor, 10%)
     border-radius 6px
     padding 0.4rem

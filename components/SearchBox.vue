@@ -4,7 +4,7 @@
       ref="input"
       aria-label="Search"
       :value="query"
-      :class="{ focused: focused }"
+      :class="[{ focused: focused }, 'searchInput']"
       :placeholder="placeholder"
       autocomplete="off"
       spellcheck="false"
@@ -17,6 +17,7 @@
     />
     <ul v-if="showSuggestions" class="suggestions" :class="{ 'align-right': alignRight }" @mouseleave="unfocus"
         ref="suggestions">
+      <li class="total-suggestions">共搜索到{{ suggestions.length || 0 }}条内容</li>
       <li
         v-for="(s, i) in suggestions"
         :key="i"
@@ -311,25 +312,37 @@ function highlight(str, strHighlight) {
 font
   background yellow
 
+  searchInput
+    border-radius 4px
+
 .search-box
   display inline-block
   position relative
   margin-right 1rem
 
+  .total-suggestions
+    margin 1px 0 2x 2px
+    font-family 'PingFang SC';
+    font-style normal;
+    font-weight 400;
+    font-size 14px;
+    color: #666666;
+
   input
     cursor text
-    width 10rem
+    width 13rem
     height: 2rem
     color lighten($textColor, 25%)
     display inline-block
     border 1px solid darken($borderColor, 10%)
-    border-radius 2rem
+    border-radius 4px
     font-size 0.9rem
     line-height 2rem
-    padding 0 0.5rem 0 2rem
+    padding 0 0.5rem 0 0.5rem
     outline none
     transition all .2s ease
-    background #fff url(../assets/search.svg) 0.6rem 0.5rem no-repeat
+    background #fff url(../assets/search.svg) no-repeat
+    background-position right 5% center
     background-size 1rem
 
     &:focus
@@ -368,8 +381,11 @@ font
       width 100%
 
       .parent-page-title
-        color white
-        font-weight 600
+        color #222222
+        font-family 'PingFang SC';
+        font-style: normal;
+        font-weight 500;
+        font-size: 14px;
         background-color $accentColor
         padding 5px
 

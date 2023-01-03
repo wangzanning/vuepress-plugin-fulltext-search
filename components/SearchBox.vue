@@ -107,7 +107,7 @@ export default {
       this.$nextTick(() => {
         let target = document.querySelector('.theme-default-content.content__default').innerHTML
         if (this.query && target) {
-          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(new RegExp(val, 'g'), `<font>${val}</font>`)
+          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(new RegExp(val, 'gi'), `<font>${val}</font>`)
           this.lastWord = val // 记录上一次查询词语
         }
       });

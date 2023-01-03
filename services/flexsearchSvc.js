@@ -17,9 +17,9 @@ export default {
     const pages = allPages.filter(p => !p.frontmatter || p.frontmatter.search !== false)
     const indexSettings = {
       encode: options.encode || 'simple',
-      tokenize: options.tokenize || 'forward',
+      tokenize: 'full',
       split: options.split || /\W+/,
-      threshold: 10,
+      threshold: 1,
       async: true,
       doc: {
         id: 'key',
@@ -40,7 +40,7 @@ export default {
         ...indexSettings,
         encode: 'icase',
         split: /\s+/,
-        tokenize: 'forward',
+        tokenize: 'full',
       })
       cyrillicIndex.add(cyrillicPages)
     }
@@ -88,13 +88,13 @@ export default {
     const searchResult1 = await index.search(searchParams)
     const searchResult2 = cyrillicIndex ? await cyrillicIndex.search(searchParams) : []
     const searchResult3 = cjkIndex ? await cjkIndex.search(searchParams) : []
-    // console.log(searchResult1, searchResult2, searchResult3);
+    // console.log('search', searchParams);
+    // console.log('result', searchResult1, searchResult2, searchResult3);
     let searchResult = _.uniqBy([...searchResult1, ...searchResult2, ...searchResult3], 'path')
     searchResult = searchResult.filter((item)=> {
-      return item.content.indexOf(queryString) !== -1;
+      return item.content.toLowerCase().indexOf(queryString.toLowerCase()) !== -1;
     })
-    console.log(searchResult);
-    console.log(queryString);
+    // console.log(searchResult);
     const result = searchResult.map(page => ({
       ...page,
       parentPageTitle: getParentPageTitle(page),

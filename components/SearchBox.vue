@@ -107,11 +107,12 @@ export default {
       this.$nextTick(() => {
         let target = document.querySelector('.theme-default-content.content__default').innerHTML
         if (this.query && target) {
-          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(new RegExp(val, 'gi'), `<font>${val}</font>`)
+          // reg: val not contained in html tag
+          const reg = new RegExp(`(?<!<[^>]*?)${val}(?![^<]*?>)`, 'gi')
+          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(reg, `<font>${val}</font>`)
           this.lastWord = val // 记录上一次查询词语
         }
       });
-
     }
   },
   /* global OPTIONS */

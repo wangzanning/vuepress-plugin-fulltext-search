@@ -53,6 +53,7 @@
 
 <script>
 import flexsearchSvc from '../services/flexsearchSvc';
+import _ from 'lodash';
 
 // see https://vuepress.vuejs.org/plugin/option-api.html#clientdynamicmodules
 import hooks from '@dynamic/hooks'
@@ -154,6 +155,16 @@ export default {
         headingDisplay: highlight(s.headingStr, s.headingHighlight),
         contentDisplay: highlight(s.contentStr, s.contentHighlight),
       }))
+      // 按目录顺序排序
+      this.suggestions = _.sortBy(this.suggestions, function (n) {
+        return n.relativePath.split('/')[3]?.replace(/[^\d+]/g, '');
+      }, function (n) {
+        return n.relativePath.split('/')[2]?.replace(/[^\d+]/g, '');
+      }, function (n) {
+        return n.relativePath.split('/')[1]?.replace(/[^\d+]/g, '');
+      }, function (n) {
+        return n.relativePath.split('/')[0]?.replace(/[^\d+]/g, '');
+      })
     },
     getPageLocalePath(page) {
       for (const localePath in this.$site.locales || {}) {

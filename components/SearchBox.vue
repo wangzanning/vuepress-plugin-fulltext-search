@@ -28,9 +28,8 @@
         @mouseenter="focus(i)"
       >
         <a :href="s.path + s.slug" @click.prevent>
-          <div v-if="s.parentPageTitle" class="parent-page-title" v-html="s.parentPageTitle"/>
+          <div v-if="s.parentPageTitle" class="parent-page-title" v-html="getParentTitle(s.relativePath)"/>
           <div class="suggestion-row">
-            <div class="page-title">{{ s.title || s.path }}</div>
             <div class="suggestion-content">
               <!-- prettier-ignore -->
               <div v-if="s.headingStr" class="header">
@@ -53,7 +52,7 @@
 </template>
 
 <script>
-import flexsearchSvc from '../services/flexsearchSvc'
+import flexsearchSvc from '../services/flexsearchSvc';
 
 // see https://vuepress.vuejs.org/plugin/option-api.html#clientdynamicmodules
 import hooks from '@dynamic/hooks'
@@ -280,17 +279,18 @@ export default {
       }
       const focusEl = this.$refs[`item_${this.focusIndex}`][0];
       const parentEl = this.$refs.suggestions;
-      console.log('el', focusEl)
-      console.log('focusElRECT', focusEl.getBoundingClientRect());
-      console.log('parentEl', parentEl.getBoundingClientRect());
-
     },
     handleInput(event) {
       this.query = event.target.value
       this.focused = true
     },
+    getParentTitle(path) {
+      const parentPath = path.split('/').map((item)=>{
+        return item?.replace(/(^\d+\.)/, '')?.replace(/(\.md$)/, '');
+      }).join(' > ');
+      return parentPath;
+    }
   },
-
 }
 
 function highlight(str, strHighlight) {

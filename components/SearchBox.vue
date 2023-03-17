@@ -32,16 +32,15 @@
           <div class="suggestion-row">
             <div class="suggestion-content">
               <!-- prettier-ignore -->
-              <div v-if="s.headingStr" class="header">
-                {{ s.headingDisplay.prefix }}<span class="highlight">{{
-                  s.headingDisplay.highlightedContent
-                }}</span>{{ s.headingDisplay.suffix }}
-              </div>
-              <!-- prettier-ignore -->
               <div v-if="s.contentStr">
                 {{ s.contentDisplay.prefix }}<span class="highlight">{{
                   s.contentDisplay.highlightedContent
                 }}</span>{{ s.contentDisplay.suffix }}
+              </div>
+              <div v-else>
+                {{ s.headingDisplay.prefix }}<span class="highlight">{{
+                  s.headingDisplay.highlightedContent
+                }}</span>{{ s.headingDisplay.suffix }}
               </div>
             </div>
           </div>
@@ -155,16 +154,21 @@ export default {
         headingDisplay: highlight(s.headingStr, s.headingHighlight),
         contentDisplay: highlight(s.contentStr, s.contentHighlight),
       }))
-      // 按目录顺序排序
-      this.suggestions = _.sortBy(this.suggestions, function (n) {
-        return n.relativePath.split('/')[3]?.replace(/[^\d+]/g, '');
-      }, function (n) {
-        return n.relativePath.split('/')[2]?.replace(/[^\d+]/g, '');
-      }, function (n) {
-        return n.relativePath.split('/')[1]?.replace(/[^\d+]/g, '');
-      }, function (n) {
-        return n.relativePath.split('/')[0]?.replace(/[^\d+]/g, '');
-      })
+      // 按每层目录顺序排序，由最内层至最外层
+      this.suggestions = _.sortBy(this.suggestions, this.sortEachToc(4));
+      this.suggestions = _.sortBy(this.suggestions, this.sortEachToc(3));
+      this.suggestions = _.sortBy(this.suggestions, this.sortEachToc(2));
+      this.suggestions = _.sortBy(this.suggestions, this.sortEachToc(1));
+      this.suggestions = _.sortBy(this.suggestions, this.sortEachToc(0));
+    },
+    sortEachToc(layer) {
+      return function (n){
+        let temp = n.relativePath.split('/')[layer]?.replace(/[^\d+]/g, '') || '999';
+        while (temp.length < 3) {
+          temp = temp + '0' ;
+        }
+        return temp;
+      }
     },
     getPageLocalePath(page) {
       for (const localePath in this.$site.locales || {}) {
@@ -290,6 +294,10 @@ export default {
       }
       const focusEl = this.$refs[`item_${this.focusIndex}`][0];
       const parentEl = this.$refs.suggestions;
+      console.log('el', focusEl)
+      console.log('focusElRECT', focusEl.getBoundingClientRect());
+      console.log('parentEl', parentEl.getBoundingClientRect());
+
     },
     handleInput(event) {
       this.query = event.target.value
@@ -297,7 +305,7 @@ export default {
     },
     getParentTitle(path) {
       const parentPath = path.split('/').map((item)=>{
-        return item?.replace(/(^\d+\.)/, '')?.replace(/(\.md$)/, '');
+        return item.replace(/(^\d+\.)/, '').replace(/(\.md$)/, '');
       }).join(' > ');
       return parentPath;
     }

@@ -95,21 +95,28 @@ export default {
     query(val) {
       this.getSuggestions()
       if (!this.suggestions?.length && this.lastWord) {
+        let queryList = this.lastWord.split(' ');
+        let target = document.querySelector('.theme-default-content.content__default').innerHTML
         this.$nextTick(() => {
-          let target = document.querySelector('.theme-default-content.content__default').innerHTML
-          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(`<font>${this.lastWord}</font>`, this.lastWord)
+          for (let val of queryList) {
+            document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(`<font>${val}</font>`, val)
+            target = document.querySelector('.theme-default-content.content__default').innerHTML
+          }
         })
       }
     },
     $route(to, from) {
-      let val = this.query;
       this.$nextTick(() => {
+        let queryList = this.query.split(' ');
         let target = document.querySelector('.theme-default-content.content__default').innerHTML
         if (this.query && target) {
-          // reg: val not contained in html tag
-          const reg = new RegExp(`(?<!<[^>]*?)${val}(?![^<]*?>)`, 'gi')
-          document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(reg, `<font>${val}</font>`)
-          this.lastWord = val // 记录上一次查询词语
+          for (let val of queryList) {
+            // reg: val not contained in html tag
+            const reg = new RegExp(`(?<!<[^>]*?)${val}(?![^<]*?>)`, 'gi')
+            document.querySelector('.theme-default-content.content__default').innerHTML = target.replace(reg, `<font>${val}</font>`)
+            target = document.querySelector('.theme-default-content.content__default').innerHTML
+          }
+          this.lastWord = this.query // 记录上一次查询词语
         }
       });
     }
@@ -140,11 +147,19 @@ export default {
         this.suggestions = []
         return
       }
-      let suggestions = await flexsearchSvc.match(
-        this.query,
-        this.queryTerms,
-        this.$site.themeConfig.searchMaxSuggestions || SEARCH_MAX_SUGGESTIONS,
-      )
+      let suggestions = []
+      const queryList = this.query.split(' ');
+      if (queryList.length > 0) {
+        for (let query of queryList) {
+          suggestions = suggestions.concat(await flexsearchSvc.match(
+            query,
+            this.queryTerms,
+            this.$site.themeConfig.searchMaxSuggestions || SEARCH_MAX_SUGGESTIONS,
+          ))
+        }
+      }
+      // console.log('total', suggestions.length);
+
       if (hooks.processSuggestions) {
         // augment suggestions with user-provided function
         suggestions = await hooks.processSuggestions(suggestions, this.query, this.queryTerms)
@@ -160,6 +175,7 @@ export default {
       this.suggestions = _.sortBy(this.suggestions, this.sortEachToc(2));
       this.suggestions = _.sortBy(this.suggestions, this.sortEachToc(1));
       this.suggestions = _.sortBy(this.suggestions, this.sortEachToc(0));
+      // console.log('suggestions', this.suggestions)
     },
     sortEachToc(layer) {
       return function (n){

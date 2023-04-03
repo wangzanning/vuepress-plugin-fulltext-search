@@ -28,7 +28,7 @@
         @mouseenter="focus(i)"
       >
         <a :href="s.path + s.slug" @click.prevent>
-          <div v-if="s.parentPageTitle" class="parent-page-title" v-html="getParentTitle(s.relativePath)"/>
+          <div v-if="s.relativePath" class="parent-page-title" v-html="getParentTitle(s.relativePath)"/>
           <div class="suggestion-row">
             <div class="suggestion-content">
               <!-- prettier-ignore -->

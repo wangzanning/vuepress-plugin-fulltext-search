@@ -10,7 +10,7 @@
       spellcheck="false"
       @input="handleInput($event)"
       @focus="focused = true"
-      @blur="focused = false"
+      @blur="onBlur"
       @keyup.enter="go(focusIndex)"
       @keyup.up="onUp"
       @keyup.down="onDown"
@@ -324,7 +324,15 @@ export default {
         return item.replace(/(^\d+\.)/, '').replace(/(\.md$)/, '');
       }).join(' > ');
       return parentPath;
-    }
+    },
+    onBlur() {
+      this.focused = false
+      if (window.DATracker) {
+        window.DATracker.track('docSearchInput', {
+          query: this.query,
+        })
+      }
+    },
   },
 }
 
